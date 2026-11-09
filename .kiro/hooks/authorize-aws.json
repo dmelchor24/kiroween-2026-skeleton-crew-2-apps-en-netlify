@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Ask for authorization before touching AWS resources",
+      "trigger": "PreToolUse",
+      "description": "Forces a user confirmation before running commands that create, modify or delete AWS resources (sam deploy/delete, cloudformation, s3, knowledge base ingestion, Cognito users).",
+      "matcher": "execute_bash|control_bash_process",
+      "action": {
+        "type": "command",
+        "command": "python3 -c \"$(cat <<'PY'\nimport json, re, sys\ntry:\n    data = json.load(sys.stdin)\nexcept Exception:\n    raise SystemExit(0)\ndef commands(o):\n    if isinstance(o, dict):\n        for k, v in o.items():\n            if k == 'command' and isinstance(v, str):\n                yield v\n            else:\n                yield from commands(v)\n    elif isinstance(o, list):\n        for v in o:\n            yield from commands(v)\npattern = re.compile(\n    r'\\bsam\\s+(deploy|delete|sync)\\b'\n    r'|\\baws\\s+cloudformation\\s+(create-stack|update-stack|deploy|delete-stack)\\b'\n    r'|\\baws\\s+s3(api)?\\s+(cp|sync|mv|rm|rb|mb|put-object|delete-object)\\b'\n    r'|\\baws\\s+bedrock-agent\\s+(start-ingestion-job|delete-\\S+|create-\\S+)'\n    r'|\\baws\\s+cognito-idp\\s+admin-\\S+'\n    r'|\\baws\\s+logs\\s+delete-\\S+')\nhit = next((c for c in commands(data) if pattern.search(c)), None)\nif hit:\n    print(json.dumps({'hookSpecificOutput': {\n        'permissionDecision': 'ask',\n        'permissionDecisionReason': 'This command creates, modifies or deletes AWS resources. Confirm the account, region and resources before continuing.'}}))\nPY\n)\"",
+        "timeout": 10
+      }
+    }
+  ]
+}

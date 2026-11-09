@@ -1,0 +1,5 @@
+strands-agents==0.1.9
+boto3==1.38.42
+fastapi==0.115.12
+uvicorn[standard]==0.34.3
+pydantic==2.12.5

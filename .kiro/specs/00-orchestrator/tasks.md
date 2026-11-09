@@ -1,0 +1,26 @@
+# Implementation plan: orchestrator
+> Entry point. Say **"run"** and Kiro goes through these tasks in order, without asking you to repeat it. Each task delegates to the `tasks.md` of the indicated spec and marks it when finished.
+- [x] 1. Run the `01-system-design` spec
+  - Perform all tasks in `.kiro/specs/01-system-design/tasks.md`.
+  - Result: `web/src/styles/tokens.css`, `pwa/src/styles/tokens.css`, `pwa/public/manifest.webmanifest`, `pwa/public/icons/*.png`.
+- [x] 2. Run the `02-web-portal` spec
+  - Perform all tasks in `.kiro/specs/02-web-portal/tasks.md`.
+  - Result: two self-contained Vite projects, `web/` and `pwa/`, with login and shell (the PWA also with manifest and service worker); `npm run build` succeeds in both.
+- [x] 3. Run the `03-knowledge-base` spec
+  - Perform all tasks in `.kiro/specs/03-knowledge-base/tasks.md`.
+  - Result: `chat.html` in `web/` and `pwa/` + Lambda `infra/kb_chat/` + artifact `kiroween-2026-information/categories-and-prizes.md`.
+- [x] 4. Run the `04-iam-policy-agent` spec
+  - Perform all tasks in `.kiro/specs/04-iam-policy-agent/tasks.md`.
+  - Result: `policies.html` in `web/` and `pwa/` + agent, proxy and custom resources in `infra/`.
+- [x] 5. Local verification of all generated code
+  - `npm run build` without errors inside `web/` and inside `pwa/` (each generates `dist/index.html`, `dist/chat.html`, `dist/policies.html`).
+  - `web/dist/` does not contain `sw.js` or `manifest.webmanifest`; `pwa/dist/` does. `grep -rniE "serviceWorker|manifest|apple-" web --include='*.html' --include='*.js' -l --exclude-dir=node_modules --exclude-dir=dist` returns nothing.
+  - `find . -name "*.sh" -not -path "*/node_modules/*"` returns nothing.
+  - Delete `web/dist/`, `pwa/dist/` and any `__pycache__` created during verification.
+- [x] 6. Generate `ARTIFACTS-README.md`
+  - Create the file in the root following the `design.md` template, with real data from the generated repository.
+  - It must include every step to bring up each app (`cd web` / `cd pwa` → `npm install`, `npm run dev`) and access it in the simplest way.
+- [x] 7. Run the `05-aws-deployment` spec (last task)
+  - Perform all tasks in `.kiro/specs/05-aws-deployment/tasks.md`.
+  - Includes explicit authorization before creating the AWS resources, the test user (which is shown to the user) and the knowledge base sync with progress in the console.
+  - When finished, announce that the project is complete and how to run it: `npm run dev` inside `web/` (5173) or `pwa/` (5174).

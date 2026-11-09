@@ -1,0 +1,392 @@
+/* policies.css — styles for the IAM policy generator.
+ * All classes carry the pol- prefix so they do not collide with dashboard.css.
+ * Only uses variables from tokens.css (never hard-coded colors or fonts). */
+
+#section-policies [hidden] { display: none !important; }
+
+/* ─── Workspace layout ──────────────────────────────────── */
+.pol-workspace {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  align-items: stretch;
+}
+
+/* ─── Panels ────────────────────────────────────────────── */
+.pol-panel {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.pol-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.pol-panel-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Input panel body */
+.pol-panel-input .pol-form-group {
+  padding: 18px 22px 0;
+}
+
+.pol-panel-input .pol-btn-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin: 18px 22px 0;
+}
+
+.pol-panel-input .pol-btn-generate {
+  flex: 1;
+}
+
+.pol-panel-input .pol-status-msg {
+  margin: 8px 22px 18px;
+}
+
+/* ─── Form elements ─────────────────────────────────────── */
+.pol-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 7px;
+  letter-spacing: 0.02em;
+}
+
+.pol-label-optional {
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.pol-input,
+.pol-textarea {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  padding: 10px 13px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: none;
+}
+
+.pol-input::placeholder,
+.pol-textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+.pol-input:focus,
+.pol-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* ─── Radio group ───────────────────────────────────────── */
+.pol-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pol-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.pol-radio-option input[type="radio"] {
+  display: none;
+}
+
+.pol-radio-custom {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--card-border);
+  background: var(--input-bg);
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+  position: relative;
+}
+
+.pol-radio-option input[type="radio"]:checked + .pol-radio-custom {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.pol-radio-option input[type="radio"]:checked + .pol-radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.pol-radio-label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* ─── Generate button ───────────────────────────────────── */
+.pol-btn-generate {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s, transform 0.1s;
+  position: relative;
+}
+
+.pol-btn-generate:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.pol-btn-generate:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.pol-btn-generate:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pol-btn-generate.pol-loading .pol-btn-text {
+  opacity: 0;
+}
+
+.pol-btn-spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(128, 128, 128, 0.3);
+  border-top-color: var(--on-accent);
+  border-radius: 50%;
+  animation: pol-spin 0.7s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -8px;
+  margin-left: -8px;
+}
+
+.pol-btn-generate.pol-loading .pol-btn-spinner {
+  display: block;
+}
+
+/* ─── Clear button ──────────────────────────────────────── */
+.pol-btn-clear {
+  flex-shrink: 0;
+  width: 40px;
+  padding: 0;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.pol-btn-clear:hover:not(:disabled) {
+  color: var(--error);
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+}
+
+.pol-btn-clear:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+@keyframes pol-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Status message ────────────────────────────────────── */
+.pol-status-msg {
+  font-size: 12px;
+  min-height: 16px;
+  color: var(--error);
+}
+
+/* ─── Output panel ──────────────────────────────────────── */
+.pol-panel-output {
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+.pol-panel-output.pol-has-content {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 0 32px color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.pol-output-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pol-btn-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.pol-btn-action:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* ─── Empty state ───────────────────────────────────────── */
+.pol-output-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px;
+  text-align: center;
+}
+
+.pol-empty-text {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.pol-empty-subtext {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.55;
+  max-width: 240px;
+}
+
+/* ─── Code output ───────────────────────────────────────── */
+.pol-output-code-wrap {
+  flex: 1;
+  overflow: auto;
+  padding: 22px;
+}
+
+.pol-output-code {
+  margin: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--text);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+/* Syntax-style coloring via spans (added by JS) */
+.pol-output-code .pol-key   { color: var(--syntax-key); }
+.pol-output-code .pol-str   { color: var(--syntax-str); }
+.pol-output-code .pol-bool  { color: var(--syntax-bool); }
+.pol-output-code .pol-punct { color: var(--text-muted); }
+
+/* Typewriter cursor */
+.pol-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: pol-blink 1s step-end infinite;
+}
+
+@keyframes pol-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ─── S3 confirmation ───────────────────────────────────── */
+.pol-s3-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background: color-mix(in srgb, var(--success) 8%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+  font-size: 12px;
+  color: var(--success);
+  font-family: var(--font-mono);
+}
+
+/* ─── Responsive ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .pol-workspace {
+    grid-template-columns: 1fr;
+    padding: 20px 16px;
+  }
+
+  .pol-panel-output {
+    min-height: 360px;
+  }
+
+  }
+
+/* ─── Reduced motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pol-btn-spinner,
+  .pol-cursor {
+    animation: none;
+  }
+}
+
+.pol-fieldset { border: 0; margin: 0; min-width: 0; }
+.pol-fieldset legend { padding: 0; }
+.pol-status-msg.pol-success { color: var(--success); }
+.pol-s3-confirm { flex-wrap: wrap; }
+.pol-s3-confirm a { color: var(--accent); text-decoration: underline; }

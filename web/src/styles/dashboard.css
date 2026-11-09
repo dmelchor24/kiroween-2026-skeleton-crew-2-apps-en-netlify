@@ -1,0 +1,1042 @@
+/* ============================================================
+   welcome.css — Dashboard layout & design system
+   Reuses CSS variables and fonts defined in styles.css.
+   styles.css must be loaded before this file.
+   ============================================================ */
+
+/* ---- Reset / base (body override for dashboard) ----------- */
+
+/* Global outline reset on click for all interactive dashboard elements */
+.dashboard-body *:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+body.dashboard-body {
+  /* welcome.js adds the .dashboard-ready class after validating the session */
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+body.dashboard-body.dashboard-ready {
+  opacity: 1;
+  pointer-events: auto;
+  overflow: auto;
+}
+
+/* ---- Theme toggle button ---------------------------------- */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---- Topbar ----------------------------------------------- */
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  z-index: 100;                   /* above Sidebar (z-index: 50) and Content Area */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: var(--card);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.topbar-brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.topbar-user {
+  font-family: var(--font-display);  /* Req 4.3: Space Grotesk */
+  font-size: 13.5px;
+  color: var(--text);                /* Req 4.3: --text */
+  max-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- Online indicator (green pulsing dot) ----------------- */
+
+.online-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 50%, transparent);
+  animation: pulse-dot 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+@keyframes pulse-dot {
+  0%   { box-shadow: 0 0 0 0   color-mix(in srgb, var(--success) 55%, transparent); }
+  60%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--success) 0%, transparent);    }
+  100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--success) 0%, transparent);    }
+}
+
+/* ---- Offline indicator (red static dot) ------------------- */
+
+.online-dot.dot--offline {
+  background: var(--offline);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--offline) 0%, transparent);
+  animation: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .online-dot.dot--offline {
+    animation: pulse-dot-offline 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+}
+
+@keyframes pulse-dot-offline {
+  0%   { box-shadow: 0 0 0 0   color-mix(in srgb, var(--offline) 55%, transparent); }
+  60%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--offline) 0%, transparent);    }
+  100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--offline) 0%, transparent);    }
+}
+
+.topbar-username {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Dashboard layout ------------------------------------- */
+
+/*
+  Layout: fixed 48px Topbar on top + bottom row = 240px Sidebar + Content Area for the rest.
+  Req 3.1: Sidebar fixed 240 px on the left, Content Area takes the remaining width.
+  Req 4.4: Topbar 48 px, no overlap with Sidebar/Content Area.
+*/
+
+.dashboard-layout {
+  display: flex;
+  position: fixed;
+  top: 48px;        /* right below the Topbar */
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* ---- Sidebar ---------------------------------------------- */
+
+.sidebar {
+  flex: 0 0 240px;                  /* Req 3.1: 240 px fixed width */
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--card);
+  border-right: 1px solid var(--card-border);
+  overflow: hidden;                 /* ear is already outside the nav */
+  z-index: 50;
+  transition: flex-basis 0.25s ease, width 0.25s ease, transform 0.25s ease;
+}
+
+.sidebar-top {
+  padding: 12px 0 0;
+}
+
+.sidebar-logo {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 20px 16px;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 8px;
+}
+
+/* Nav list */
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 8px;
+}
+
+.nav-list li {
+  margin: 2px 0;
+}
+
+.nav-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.nav-item:hover .nav-icon,
+.nav-item[aria-current="page"] .nav-icon,
+.nav-item.nav-item--active .nav-icon {
+  opacity: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 12px;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: none;         /* when .nav-item is <a> */
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.nav-label {
+  transition: opacity 0.2s ease, width 0.25s ease;
+  overflow: hidden;
+}
+
+.nav-item:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text);
+}
+
+/* Active nav item */
+.nav-item[aria-current="page"],
+.nav-item.is-active,
+.nav-item.nav-item--active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Sidebar bottom — sign-out area */
+.sidebar-bottom {
+  padding: 0 8px 16px;
+}
+
+.sidebar-divider {
+  border: none;
+  border-top: 1px solid var(--card-border);
+  margin: 0 4px 12px;
+}
+
+.nav-signout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 12px;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-signout:hover {
+  background: color-mix(in srgb, var(--error) 12%, transparent);
+  color: var(--error);
+}
+
+.signout-icon {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  opacity: 0.7;
+}
+
+/* ---- Sidebar ear (collapse/expand — desktop only) ------- */
+
+.sidebar-ear {
+  position: absolute;              /* relative to .dashboard-layout (position:fixed) */
+  top: 50%;
+  left: 240px;                     /* attached to the right edge of the expanded sidebar */
+  transform: translateY(-50%) translateX(-50%);
+  z-index: 60;
+  width: 24px;
+  height: 48px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: left 0.25s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-ear:hover {
+  background: var(--bg);
+  color: var(--accent);
+}
+
+.sidebar-ear:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sidebar-ear__icon {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+/* When the sidebar is collapsed, the arrow points right */
+.dashboard-layout.sidebar-is-collapsed .sidebar-ear__icon {
+  transform: rotate(180deg);
+}
+
+/* Ear moves when the sidebar collapses */
+.dashboard-layout.sidebar-is-collapsed .sidebar-ear {
+  left: 56px;
+}
+
+/* ---- Collapsed sidebar (desktop) -------------------------- */
+
+.sidebar--collapsed {
+  flex: 0 0 56px;
+  width: 56px;
+  overflow: visible;              /* lets the ear stick out */
+}
+
+.sidebar--collapsed .nav-label {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+.sidebar--collapsed .nav-item {
+  justify-content: center;
+  gap: 0;
+  padding: 9px 0;
+  position: relative;
+}
+
+.sidebar--collapsed .nav-signout {
+  justify-content: center;
+  gap: 0;
+  padding: 9px 0;
+}
+
+.sidebar--collapsed .nav-icon,
+.sidebar--collapsed .signout-icon {
+  opacity: 0.7;
+  margin: 0 auto;
+}
+
+/* Tooltip on collapsed items */
+.sidebar--collapsed .nav-item::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 200;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.sidebar--collapsed .nav-item:hover::after {
+  opacity: 1;
+}
+
+/* ---- Sidebar toggle (hamburger — mobile only) -------------- */
+
+.sidebar-toggle {
+  display: none;            /* hidden on desktop; shown in media query */
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  z-index: 200;
+  background: none;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Content Area ----------------------------------------- */
+
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  background: var(--bg);
+}
+
+/* ---- Content sections ------------------------------------- */
+
+/* The HTML [hidden] attribute hides the section.
+   When JS sets sec.hidden = false the browser removes the attribute
+   and the section returns to its natural display (block).
+   The explicit display rule ensures that [hidden] takes priority. */
+
+.content-section {
+  display: block;
+}
+
+.content-section[hidden] {
+  display: none;
+}
+
+/* Section headings */
+.content-section h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  margin: 0 0 24px;
+  color: var(--text);
+}
+
+.section-placeholder,
+.welcome-intro {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ---- Focus visible (accessibility) ------------------------ */
+
+/*
+  Global reset: removes outline on click for all interactive elements
+  of the dashboard. :focus-visible is only triggered by keyboard.
+*/
+.nav-item:focus,
+.nav-signout:focus,
+.sidebar-toggle:focus,
+.sidebar-ear:focus,
+.offline-modal__btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.dashboard-body .nav-item:focus-visible,
+.dashboard-body .nav-signout:focus-visible,
+.dashboard-body .sidebar-toggle:focus-visible,
+.dashboard-body .sidebar-ear:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ---- Responsive: viewport < 768 px ----------------------- */
+
+@media (max-width: 767px) {
+
+  /* Req 3.4: Sidebar hidden, takes no space */
+  .sidebar {
+    position: fixed;
+    top: 48px;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Hide ear on mobile — the hamburger already exists */
+  .sidebar-ear {
+    display: none;
+  }
+
+  /* Req 3.5: Sidebar visible (overlaid) when the toggle is activated */
+  .sidebar.sidebar--open {
+    transform: translateX(0);
+  }
+
+  /* Content area takes the full width on mobile */
+  .content-area {
+    padding: 16px;
+  }
+
+  /* Show hamburger button on mobile */
+  .sidebar-toggle {
+    display: flex;
+  }
+
+  /* Req 4.4: Topbar does not overlap the Sidebar (Topbar has z-index: 100 > Sidebar: 50) */
+  /* The hamburger toggle has z-index: 200 to sit above the Topbar */
+}
+
+/* ---- Reduced motion ---------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-ear {
+    transition: none;
+  }
+  .online-dot,
+  .online-dot.dot--offline {
+    animation: none;
+  }
+  body.dashboard-body {
+    transition: none;
+  }
+}
+
+/* ---- Offline modal ----------------------------------------- */
+
+.offline-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fade-in 0.2s ease;
+  /* Ensure it covers the entire viewport */
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+}
+
+.offline-modal.offline-modal--visible {
+  display: flex;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.offline-modal__card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 36px 32px 28px;
+  max-width: 360px;
+  width: calc(100% - 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  animation: slide-up 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.offline-modal__icon {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.offline-modal__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text);
+  margin: 0;
+}
+
+.offline-modal__body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.offline-modal__spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid color-mix(in srgb, var(--text) 15%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.offline-modal__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.offline-modal__divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--card-border);
+  margin: 4px 0;
+}
+
+.offline-modal__btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.offline-modal__btn:hover {
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.offline-modal__btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+   Chat Agent — panel embedded in #section-chat
+   Respects the theme system variables (light/dark).
+   ============================================================ */
+
+/* ---- Shell (fills the whole content-area) ------------------- */
+
+#section-chat {
+  /* Required so .chat-shell uses full height */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;            /* the shell handles its own spacing */
+  overflow: hidden;
+}
+
+#section-chat[hidden] {
+  display: none;
+}
+
+.chat-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  max-width: 780px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---- Agent sub-header --------------------------------- */
+
+.chat-agent-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.chat-agent-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chat-agent-logo svg {
+  width: 18px;
+  height: 18px;
+}
+
+.chat-agent-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-agent-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+/* ---- Message area -------------------------------------- */
+
+.chat-messages {
+  overflow-y: auto;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 4px;
+}
+
+/* Pushes the content inward so the scrollbar
+   sits in the empty space, without covering the bubbles */
+.chat-messages {
+  scrollbar-gutter: stable;
+  padding-right: 12px;
+}
+
+/* ---- Empty state ------------------------------------------ */
+
+.chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  animation: chatFadeIn 0.4s ease;
+  padding: 40px 0;
+}
+
+.chat-empty-icon {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.chat-empty-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.chat-empty-body {
+  font-family: var(--font-body);
+  font-size: 13px;
+  max-width: 280px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ---- Chat bubbles -------------------------------------- */
+
+.chat-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: chatSlideUp 0.2s ease;
+}
+
+/* Inner row: avatar + text bubble */
+.chat-bubble-inner {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.chat-bubble--user .chat-bubble-inner { flex-direction: row-reverse; }
+
+.chat-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+
+.chat-bubble--user .chat-avatar {
+  background: var(--card-border);
+  color: var(--text-muted);
+}
+
+.chat-bubble--agent .chat-avatar {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.chat-content {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.chat-bubble--user .chat-content {
+  background: var(--card);
+  color: var(--text);
+}
+
+.chat-bubble--agent .chat-content {
+  background: var(--card);
+  border-color: var(--card-border);
+  color: var(--text);
+}
+
+/* ---- Message timestamp --------------------------------- */
+
+.chat-timestamp {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ---- Streaming cursor ----------------------------------- */
+
+.chat-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: chatBlink 0.7s step-end infinite;
+}
+
+/* ---- Typing indicator ------------------------------- */
+
+.chat-typing {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 12px 14px;
+  width: fit-content;
+}
+
+.chat-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: chatBounce 1.2s ease infinite;
+}
+
+.chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ---- Error message -------------------------------------- */
+
+.chat-error {
+  font-size: 12.5px;
+  color: var(--error);
+  padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--error) 30%, transparent);
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+  border-radius: 8px;
+  max-width: 80%;
+  margin-left: 38px;
+}
+
+/* ---- Footer / Input --------------------------------------- */
+
+.chat-footer {
+  padding: 14px 0 20px;
+  border-top: 1px solid var(--card-border);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 10px 10px 10px 16px;
+  transition: border-color 0.2s ease;
+}
+
+.chat-input-row:focus-within {
+  border-color: var(--accent);
+}
+
+.chat-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  min-height: 22px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.chat-textarea::placeholder { color: var(--text-muted); }
+
+.chat-textarea::-webkit-scrollbar { width: 3px; }
+.chat-textarea::-webkit-scrollbar-thumb { background: var(--card-border); }
+
+.chat-send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: none;
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.chat-send-btn:hover:not(:disabled) { opacity: 0.82; }
+.chat-send-btn:active:not(:disabled) { transform: scale(0.93); }
+.chat-send-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.chat-send-btn svg { width: 15px; height: 15px; }
+
+.chat-footer-hint {
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 9px;
+}
+
+.chat-footer-hint kbd {
+  background: var(--card-border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ---- Animations ------------------------------------------ */
+
+@keyframes chatFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes chatSlideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes chatBlink {
+  50% { opacity: 0; }
+}
+
+@keyframes chatBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40%           { transform: translateY(-5px); background: var(--accent); }
+}
+
+/* ---- Responsive ------------------------------------------- */
+
+@media (max-width: 767px) {
+  .chat-shell {
+    padding: 0 12px;
+  }
+  .chat-content {
+    max-width: 90%;
+  }
+}
+
+/* content-area in chat.html — no padding so the chat-shell fills it entirely */
+.content-area--chat {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

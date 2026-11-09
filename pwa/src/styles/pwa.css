@@ -1,0 +1,40 @@
+/* pwa.css — adjustments for installed use on iOS (iPhone) and macOS.
+ * Safe area (notch / home bar), no zoom on field focus and dynamic height. */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Prevents full-screen bounce in the installed app */
+body {
+  overscroll-behavior-y: none;
+}
+
+/* iPhone home bar: the chat footer and sign-out are not covered */
+.chat-footer {
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+.sidebar-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Landscape orientation with notch */
+.topbar {
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+
+/* iOS zooms when focusing fields with a font smaller than 16 px */
+@media (max-width: 768px) {
+  input, textarea, select,
+  .chat-textarea,
+  .pol-input, .pol-textarea {
+    font-size: 16px;
+  }
+}
+
+/* Real window height on iOS (the Safari bar changes 100vh) */
+@supports (height: 100dvh) {
+  .scene { min-height: 100dvh; }
+}

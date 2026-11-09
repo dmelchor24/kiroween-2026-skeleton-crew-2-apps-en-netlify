@@ -1,0 +1,2 @@
+# proxy_handler.py only uses boto3 and the Python standard library.
+# boto3 is already included in the Lambda runtime — no extra dependencies.

@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Reset tasks on a fresh clone and show status",
+      "trigger": "SessionStart",
+      "description": "If the repository is a fresh clone (.kiro/.initialized-state does not exist), sets all tasks of all specs to pending. Always prints progress per spec and the next step.",
+      "action": {
+        "type": "command",
+        "command": "python3 - <<'PY'\nimport pathlib, re\nroot = pathlib.Path('.kiro')\nspecs = root / 'specs'\nif not specs.is_dir():\n    raise SystemExit(0)\nmarker = root / '.initialized-state'\nfiles = sorted(specs.glob('*/tasks.md'))\nif not marker.exists():\n    n = 0\n    for f in files:\n        t = f.read_text(encoding='utf-8')\n        new = re.sub(r'^(\\s*- )\\[(?:x|X|-|~)\\]', r'\\1[ ]', t, flags=re.M)\n        if new != t:\n            f.write_text(new, encoding='utf-8')\n            n += 1\n    marker.write_text('initialized\\n', encoding='utf-8')\n    print(f'[status] Fresh clone detected: tasks reset to pending in {n} file(s).')\nprint('[status] Project progress (execution order):')\nnext_spec = None\nfor f in files:\n    t = f.read_text(encoding='utf-8')\n    done = len(re.findall(r'^\\s*- \\[[xX]\\]', t, flags=re.M))\n    total = done + len(re.findall(r'^\\s*- \\[[ ~-]\\]', t, flags=re.M))\n    print(f'  - {f.parent.name}: {done}/{total}')\n    if next_spec is None and f.parent.name != '00-orchestrator' and done < total:\n        next_spec = f.parent.name\nif next_spec:\n    print(f'[status] Next spec: {next_spec}. If the user says \"run\", continue from there without asking for more instructions.')\nelse:\n    print('[status] All specs are complete. To run the site: npm run dev')\nPY",
+        "timeout": 30
+      }
+    }
+  ]
+}

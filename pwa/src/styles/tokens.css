@@ -1,0 +1,58 @@
+/* tokens.css — GENERATED from .kiro/specs/01-system-design/design.md
+ * To change colors or fonts, edit the table in that file and say "apply design".
+ * The hex values in this file are the ONLY source of colors in the project. */
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap");
+
+:root {
+  /* ---- Dark mode (default) ---- */
+  --bg: #1C1B1A;
+  --card: #242220;
+  --card-border: #34302B;
+  --text: #EDEAE4;
+  --text-muted: #9A948A;
+  --accent: #C9A227;
+  --accent-hover: #DDB32D;
+  --accent-dim: #6B5C22;
+  --on-accent: #1C1B1A;
+  --error: #D9695A;
+  --success: #4ADE80;
+  --offline: #F87171;
+  --track: #34302B;
+  --input-bg: #1A1918;
+  --input-placeholder: #5B564D;
+  --syntax-key: #7EAED8;
+  --syntax-str: #A8D8A8;
+  --syntax-bool: #F5A623;
+
+  /* ---- Typography ---- */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* ---- Shape ---- */
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+/* ---- Light mode ---- */
+html.theme-light {
+  --bg: #F5F2ED;
+  --card: #FFFFFF;
+  --card-border: #E0D9CE;
+  --text: #1C1B1A;
+  --text-muted: #6B6560;
+  --accent: #A07D10;
+  --accent-hover: #B8941E;
+  --accent-dim: #F0E4B8;
+  --on-accent: #1C1B1A;
+  --error: #C0392B;
+  --success: #059669;
+  --offline: #F87171;
+  --track: #E0D9CE;
+  --input-bg: #F0EDE8;
+  --input-placeholder: #A09890;
+  --syntax-key: #2C5F8A;
+  --syntax-str: #4A7A4A;
+  --syntax-bool: #B8761A;
+}

@@ -1,0 +1,38 @@
+# Implementation plan: web-portal
+> Prerequisite: `01-system-design` complete (`web/src/styles/tokens.css` and `pwa/src/styles/tokens.css` exist). Node.js 18+.
+> The rules for which file goes in `web/`, in `pwa/` or in both are in `design.md` › "Rules for creating the files from the blocks".
+- [x] 1. Vite projects (one per app)
+  - Create `web/package.json`, `web/vite.config.js` and `web/netlify.toml`; and `pwa/package.json`, `pwa/vite.config.js` and `pwa/netlify.toml` (`vite.config.js` only with the `index` entry; `chat` and `policies` are added by specs 03 and 04 in **both** apps).
+  - Create `.gitignore` in the root if it does not exist (it must include `node_modules/`, `dist/`, `.env`, `.env.local`, `.aws-sam/`, `.venv/`, `*.log`, `.kiro/.initialized-state`, and macOS and Windows system files such as `.DS_Store`, `Thumbs.db` and `Desktop.ini`).
+  - Run `npm install` inside `web/` and inside `pwa/` (each with its own `node_modules`).
+  - _Requirements: 5_
+- [x] 2. Configuration and authentication
+  - Create in `web/` and in `pwa/` (identical content): `src/config.js`, `src/auth/cognito.js`, `src/auth/session.js`, `src/auth/login.js`.
+  - _Requirements: 1, 2_
+- [x] 3. Shared utilities and shell
+  - Create in both apps: `src/shared/{api,qr,sidebar,theme,topbar,ui,utils}.js` and `src/pages/dashboard.js`.
+  - _Requirements: 3_
+- [x] 4. Styles
+  - Create in both apps `src/styles/login.css` and `src/styles/dashboard.css`; and only in `pwa/` `src/styles/pwa.css`.
+  - Verify there are no fixed hex colors: `grep -nE "#[0-9a-fA-F]{3,8}\b" web/src/styles/*.css pwa/src/styles/*.css` may only show `tokens.css` and the QR container's `#fff` in `login.css`.
+  - _Requirements: 3.3, 4.3; spec 01 › Requirement 3_
+- [x] 5. Login page and PWA
+  - Create `index.html` and `src/main-login.js` in both apps applying the `web/` variant (no PWA metas, no service worker registration, no `import "./styles/pwa.css"`) and the full version in `pwa/`.
+  - Create only in `pwa/`: `public/sw.js`. Confirm that `pwa/public/manifest.webmanifest` and `pwa/public/icons/` exist (spec 01).
+  - Confirm that `web/` has no `public/` folder.
+  - _Requirements: 1, 4_
+- [x] 6. Local verification (in each app)
+  - From `web/` and from `pwa/`: `npm run build` finishes without errors.
+  - Start `npm run dev` for each app (background processes). In `web/` (5173) check with `curl` that these respond 200: `/index.html` and `/src/styles/tokens.css`. In `pwa/` (5174): `/index.html`, `/manifest.webmanifest`, `/icons/apple-touch-icon.png`, `/src/styles/tokens.css` and `/sw.js`. Stop the processes.
+  - Without `.env.local` the login must show the missing-configuration message (expected behavior until deployment).
+  - _Requirements: 2.2, 5_
+- [x] 7. Verify the web/pwa separation
+  - `grep -rniE "serviceWorker|manifest|apple-mobile|apple-touch|pwa\.css" web --include='*.html' --include='*.js' --include='*.css' --include='*.toml' -l --exclude-dir=node_modules --exclude-dir=dist` returns nothing.
+  - `web/dist/` does not contain `sw.js` or `manifest.webmanifest`; `pwa/dist/` does.
+  - Shared files are identical: `diff -r web/src pwa/src` only shows differences in `main-*.js` (the `pwa.css` line) and the absence of `pwa/src/styles/pwa.css` in `web/`.
+  - _Requirements: 4.0, 5.2, 5.4_
+- [x] 8. Checkpoint
+  - Confirm with `find . -name "*.sh" -not -path "*/node_modules/*"` that there are no `.sh` files.
+  - Delete `web/dist/` and `pwa/dist/`.
+  - The AWS resources of this spec (`UserPool`, `UserPoolClient`, `PortalApi`) are created in `05-aws-deployment`; DO NOT deploy here.
+  - Close: mark the spec in `00-orchestrator/tasks.md` and announce `03-knowledge-base`.

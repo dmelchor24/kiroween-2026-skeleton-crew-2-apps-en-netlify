@@ -1,0 +1,24 @@
+version = 0.1
+
+[default.global.parameters]
+# A single stack for the whole project
+stack_name = "skeleton-crew"
+region = "us-east-1"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+s3_prefix = "skeleton-crew"
+# Prior authorization is requested in Kiro; here CloudFormation does not ask again
+confirm_changeset = false
+capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"]
+# If it fails, leave the stack in the error state so it can be diagnosed
+disable_rollback = true
+# SAM creates and manages the artifacts bucket (stack aws-sam-cli-managed-default)
+resolve_s3 = true
+tags = [
+  "Project=kiroween-2026",
+  "ManagedBy=SAM"
+]

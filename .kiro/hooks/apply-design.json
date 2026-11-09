@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Remind to apply the design when editing the palette",
+      "trigger": "PostFileSave",
+      "description": "When the design table is saved, regenerate tokens.css and sync the PWA if the project has already been generated.",
+      "matcher": "01-system-design/design\\.md$",
+      "action": {
+        "type": "agent",
+        "prompt": "The file .kiro/specs/01-system-design/design.md was saved. If pwa/src/styles/tokens.css exists (the portal has already been generated), compare the values in the \"Palette (edit here)\" section with that file; if they differ, rewrite pwa/src/styles/tokens.css and web/src/styles/tokens.css (identical) with the same structure, run the apply-palette block inline (python3 - <<'PY', without saving files), report any contrast WARNING and remind the user to close and reopen the installed app (service worker in pwa/; the web app only needs a reload). If tokens.css does not exist yet, do nothing: the palette will be applied when spec 01 is run."
+      }
+    }
+  ]
+}

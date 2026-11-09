@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Kiroween 2026</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+  <!-- Design system: colors and fonts (generated from .kiro/specs/01-system-design) -->
+  <link rel="stylesheet" href="/src/styles/tokens.css">
+  <style>html, body { background: var(--bg); } a { color: inherit; }</style>
+  <!-- Apply theme before first paint to avoid a flash -->
+  <script>(function(){var t=localStorage.getItem('color-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';if(t==='light')document.documentElement.classList.add('theme-light');document.documentElement.style.opacity='0';})();</script>
+</head>
+<body class="dashboard-body">
+
+  <header class="topbar" role="banner">
+    <span class="topbar-brand">Kiroween 2026</span>
+    <span class="topbar-user" id="topbarUser"></span>
+  </header>
+
+  <div class="dashboard-layout">
+
+    <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+      <div class="sidebar-top">
+        <ul class="nav-list" role="list">
+          <li>
+            <a href="chat.html" class="nav-item" data-tooltip="Chat">
+              <svg class="nav-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="nav-label">Chat</span>
+            </a>
+          </li>
+          <li>
+            <a href="policies.html" class="nav-item nav-item--active" aria-current="page" data-tooltip="IAM Policies">
+              <svg class="nav-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span class="nav-label">IAM Policies</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-bottom">
+        <hr class="sidebar-divider">
+        <button id="signOutBtn" class="nav-signout">
+          <svg class="signout-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span class="nav-label">Sign out</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Ear outside the nav so it is not clipped by the sidebar's overflow:clip -->
+    <button class="sidebar-ear" id="sidebarEar"
+            aria-controls="sidebar"
+            aria-expanded="true"
+            aria-label="Collapse menu">
+      <svg class="sidebar-ear__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+
+    <button class="sidebar-toggle" id="sidebarToggle"
+            aria-controls="sidebar"
+            aria-expanded="false"
+            aria-label="Open menu">☰</button>
+
+    <main class="content-area" id="contentArea">
+      <section id="section-policies" class="content-section" aria-label="IAM policy generator">
+        <!-- initPoliciesAgent() injects the full panel here -->
+      </section>
+    </main>
+
+  </div>
+
+  <script type="module" src="/src/main-policies.js"></script>
+
+  <!-- Modal: offline -->
+  <div id="offlineModal" class="offline-modal" role="alertdialog" aria-modal="true" aria-labelledby="offlineModalTitle" aria-describedby="offlineModalBody">
+    <div class="offline-modal__card">
+      <span class="offline-modal__icon" aria-hidden="true">🌐</span>
+      <h2 class="offline-modal__title" id="offlineModalTitle">No internet connection</h2>
+      <p class="offline-modal__body" id="offlineModalBody">
+        The application cannot communicate with the server.<br>
+        Waiting for the connection to be restored…
+      </p>
+      <div class="offline-modal__status">
+        <span class="offline-modal__spinner" aria-hidden="true"></span>
+        <span>Reconnecting…</span>
+      </div>
+      <hr class="offline-modal__divider">
+      <button type="button" id="offlineSignOutBtn" class="offline-modal__btn">
+        Sign out now
+      </button>
+    </div>
+  </div>
+</body>
+</html>

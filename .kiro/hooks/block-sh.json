@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Block .sh files",
+      "trigger": "PreToolUse",
+      "description": "Rejects creating or editing files with a .sh extension: the project must be easy to use without executable scripts.",
+      "matcher": "fs_write|fs_append|str_replace",
+      "action": {
+        "type": "command",
+        "command": "python3 -c \"$(cat <<'PY'\nimport json, sys\ntry:\n    data = json.load(sys.stdin)\nexcept Exception:\n    raise SystemExit(0)\ndef paths(o, key=''):\n    if isinstance(o, dict):\n        for k, v in o.items():\n            yield from paths(v, k)\n    elif isinstance(o, list):\n        for v in o:\n            yield from paths(v, key)\n    elif isinstance(o, str) and any(s in key.lower() for s in ('path', 'file')):\n        yield o\nif any(r.strip().lower().endswith('.sh') for r in paths(data)):\n    print('Blocked: this project does not use .sh files. Run commands directly from Kiro (sam, aws, npm, python3).', file=sys.stderr)\n    raise SystemExit(2)\nPY\n)\"",
+        "timeout": 10
+      }
+    }
+  ]
+}

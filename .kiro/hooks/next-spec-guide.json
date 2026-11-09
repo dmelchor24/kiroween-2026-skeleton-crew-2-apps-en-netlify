@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Guide to the next spec when one is closed",
+      "trigger": "PostTaskExec",
+      "description": "When all tasks of a spec are complete, marks it in the orchestrator and announces (and starts) the next one.",
+      "action": {
+        "type": "agent",
+        "prompt": "Review the tasks.md of the spec that just executed a task. If ALL of its tasks are [x]: (1) mark the corresponding task in .kiro/specs/00-orchestrator/tasks.md as [x]; (2) tell the user in one or two sentences which spec finished and which one is next according to the orchestrator order (01 → 02 → 03 → 04 → local verification → ARTIFACTS-README.md → 05-aws-deployment); (3) continue with the first pending task of the next spec without waiting for the user to ask. Exception: the authorization task of 05-aws-deployment requires an explicit yes from the user before creating resources in AWS. If tasks remain pending in the current spec, do nothing special."
+      }
+    }
+  ]
+}

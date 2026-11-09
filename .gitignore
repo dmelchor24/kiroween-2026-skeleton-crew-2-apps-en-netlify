@@ -1,0 +1,31 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+.aws-sam/
+.venv/
+__pycache__/
+*.log
+.kiro/.initialized-state
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+.VolumeIcon.icns
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk

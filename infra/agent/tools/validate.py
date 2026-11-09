@@ -1,0 +1,175 @@
+"""
+Tool: validate_iam_policy
+Validates that the generated IAM policy complies with the AWS schema,
+detects dangerous wildcards and applies the rules of the requested
+privilege level.
+"""
+
+from strands import tool
+
+
+# High-risk actions that must never appear in least-privilege
+HIGH_RISK_ACTIONS = {
+    "iam:*",
+    "iam:CreateUser",
+    "iam:DeleteUser",
+    "iam:AttachUserPolicy",
+    "iam:AttachRolePolicy",
+    "iam:PutUserPolicy",
+    "iam:PutRolePolicy",
+    "iam:CreateAccessKey",
+    "iam:DeleteAccessKey",
+    "sts:AssumeRole",
+    "organizations:*",
+}
+
+# Critical services where a wildcard is always high risk
+CRITICAL_SERVICES = {"iam", "sts", "organizations", "kms"}
+
+
+def check_policy(policy: dict, permission_level: str) -> dict:
+    """
+    Validates an IAM policy (plain function, no @tool).
+
+    Used by both the `validate_iam_policy` tool and agent.py, which validates before
+    saving to S3 the policy returned by the model.
+    """
+    errors   = []
+    warnings = []
+    policy   = dict(policy)  # copy so the original is not mutated
+
+    # ── 1. Schema check ──────────────────────────────────────────
+    if "Version" not in policy:
+        errors.append("Missing 'Version' field. It must be '2012-10-17'.")
+
+    if "Statement" not in policy or not isinstance(policy["Statement"], list):
+        errors.append("Missing 'Statement' field or it is not a list.")
+        return _result(policy, errors, warnings, valid=False)
+
+    for idx, stmt in enumerate(policy["Statement"]):
+        label = stmt.get("Sid", f"Statement[{idx}]")
+
+        if "Effect" not in stmt:
+            errors.append(f"{label}: Missing 'Effect' (must be 'Allow' or 'Deny').")
+
+        if "Action" not in stmt:
+            errors.append(f"{label}: Missing 'Action'.")
+
+        if "Resource" not in stmt:
+            errors.append(f"{label}: Missing 'Resource'.")
+
+    if errors:
+        return _result(policy, errors, warnings, valid=False)
+
+    # ── 2. Action analysis ───────────────────────────────────────
+    all_actions = []
+    for stmt in policy["Statement"]:
+        actions = stmt.get("Action", [])
+        if isinstance(actions, str):
+            actions = [actions]
+        all_actions.extend(actions)
+
+    has_full_wildcard = "*" in all_actions
+    wildcarded_svcs   = [a for a in all_actions if a.endswith(":*")]
+    critical_wildcards = [
+        a for a in wildcarded_svcs
+        if a.split(":")[0] in CRITICAL_SERVICES
+    ]
+    high_risk = [a for a in all_actions if a in HIGH_RISK_ACTIONS]
+
+    # ── 3. Rules by level ────────────────────────────────────────
+    if permission_level == "least-privilege":
+        if has_full_wildcard:
+            errors.append(
+                "Level 'least-privilege' does not allow the global wildcard '*' in Action."
+            )
+        if wildcarded_svcs:
+            errors.append(
+                f"Level 'least-privilege' does not allow service wildcards: "
+                f"{', '.join(wildcarded_svcs)}. Specify concrete actions."
+            )
+        if high_risk:
+            errors.append(
+                f"High-risk actions not allowed in 'least-privilege': "
+                f"{', '.join(high_risk)}."
+            )
+
+    elif permission_level == "standard":
+        if has_full_wildcard:
+            warnings.append(
+                "The global wildcard '*' in Action is unusual for level 'standard'. "
+                "Consider specifying the actions."
+            )
+        if critical_wildcards:
+            warnings.append(
+                f"Wildcards on critical services for level 'standard': "
+                f"{', '.join(critical_wildcards)}. Check whether this is intentional."
+            )
+        if high_risk:
+            warnings.append(
+                f"High-risk actions present: {', '.join(high_risk)}. "
+                "Confirm they are necessary."
+            )
+
+    elif permission_level == "broad":
+        # For broad we only warn about IAM/STS/Organizations
+        if critical_wildcards:
+            warnings.append(
+                f"Wildcards on critical services detected: "
+                f"{', '.join(critical_wildcards)}. "
+                "Verify that the use case justifies it."
+            )
+
+    # ── 4. Resource check ───────────────────────────────────────
+    for stmt in policy["Statement"]:
+        resource = stmt.get("Resource", "")
+        if isinstance(resource, str):
+            resource = [resource]
+        if permission_level == "least-privilege" and "*" in resource:
+            warnings.append(
+                f"Statement '{stmt.get('Sid', 'no Sid')}': Resource '*' with "
+                "least-privilege is broad. Consider specifying the resource ARN."
+            )
+
+    valid = len(errors) == 0
+
+    return _result(policy, errors, warnings, valid=valid)
+
+
+@tool
+def validate_iam_policy(policy: dict, permission_level: str) -> dict:
+    """
+    Validates an IAM policy generated by generate_iam_policy.
+
+    Performs the following checks:
+    1. Minimum schema required by AWS (Version, Statement, Effect, Action, Resource).
+    2. Consistency of the privilege level vs. the actions present.
+    3. Detection of dangerous wildcards.
+    4. Critical services with excessive permissions.
+
+    Args:
+        policy:           Dictionary with the IAM policy ('policy' field of the
+                          generate_iam_policy output).
+        permission_level: Declared level: 'least-privilege', 'standard' or 'broad'.
+
+    Returns:
+        Dictionary with the validation result, list of warnings and
+        the policy (possibly corrected).
+    """
+    return check_policy(policy, permission_level)
+
+
+def _result(policy: dict, errors: list, warnings: list, valid: bool) -> dict:
+    return {
+        "valid":         valid,
+        "errors":        errors,
+        "warnings":      warnings,
+        "error_count":   len(errors),
+        "warning_count": len(warnings),
+        "policy":        policy,
+        "summary": (
+            "Valid policy." if valid and not warnings
+            else "Valid policy with warnings." if valid
+            else f"Invalid policy: {len(errors)} error(s) found."
+        ),
+    }

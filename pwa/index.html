@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Kiroween 2026</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+  <!-- PWA / iOS: installable from Safari (Share → Add to Home Screen) -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kiroween 2026">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <!-- Design system: colors and fonts (generated from .kiro/specs/01-system-design) -->
+  <link rel="stylesheet" href="/src/styles/tokens.css">
+  <style>html, body { background: var(--bg); } a { color: inherit; }</style>
+  <script>
+    // Apply theme before first paint
+    (function() {
+      var t = localStorage.getItem('color-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      if (t === 'light') document.documentElement.classList.add('theme-light');
+    })();
+  </script>
+</head>
+<body>
+
+<!-- Theme toggle: visible before login -->
+<button id="themeToggle" class="theme-toggle theme-toggle--fixed" aria-label="Toggle theme" title="Toggle theme">
+  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+</button>
+
+<main class="scene">
+  <div class="card">
+    <div class="status-bar" id="statusBar" aria-hidden="true"></div>
+
+    <div class="card-content">
+      <p class="eyebrow">Restricted access</p>
+      <h1 class="title" id="title">Sign in</h1>
+      <p class="subtitle" id="subtitle">This site only accepts previously authorized accounts.</p>
+
+      <!-- Step 1: login -->
+      <form id="loginForm" class="form" novalidate>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input type="email" id="email" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" autocomplete="current-password" required>
+        </div>
+        <p class="error" id="errorMsg" role="alert"></p>
+        <button type="submit" id="submitBtn" class="submit-btn">
+          <span class="btn-label">Sign in</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <!-- Step 2: temporary password -->
+      <form id="newPasswordForm" class="form hidden" novalidate>
+        <p class="notice" id="newPasswordNotice">First sign-in: set your new password.</p>
+        <div class="field">
+          <label for="newPassword">New password</label>
+          <input type="password" id="newPassword" name="newPassword" autocomplete="new-password" required>
+        </div>
+        <div class="field">
+          <label for="newPasswordConfirm">Confirm password</label>
+          <input type="password" id="newPasswordConfirm" name="newPasswordConfirm" autocomplete="new-password" required>
+        </div>
+        <div class="field hidden" id="nicknameField">
+          <label for="nickname">Nickname</label>
+          <input type="text" id="nickname" name="nickname" autocomplete="nickname" maxlength="20" spellcheck="false">
+          <p class="hint">3 to 20 characters: letters, numbers, hyphen or underscore.</p>
+        </div>
+        <p class="error" id="newPasswordError" role="alert"></p>
+        <button type="submit" id="newPasswordBtn" class="submit-btn">
+          <span class="btn-label">Continue</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <!-- Step 3: set up MFA -->
+      <form id="mfaSetupForm" class="form hidden" novalidate>
+        <p class="notice">Scan the code with an authenticator app (Google Authenticator, Authy, 1Password…) and enter the 6-digit code it shows.</p>
+        <div class="qr-box" id="qrBox" role="img" aria-label="QR code to set up two-step verification"></div>
+        <details class="secret-details">
+          <summary>Can't scan?</summary>
+          <code id="secretCode"></code>
+        </details>
+        <div class="field">
+          <label for="mfaSetupCode">6-digit code</label>
+          <input type="text" id="mfaSetupCode" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" required>
+        </div>
+        <p class="error" id="mfaSetupError" role="alert"></p>
+        <button type="submit" id="mfaSetupBtn" class="submit-btn">
+          <span class="btn-label">Verify and sign in</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="text-btn js-cancel">Cancel</button>
+      </form>
+
+      <!-- Step 4: MFA code -->
+      <form id="mfaCodeForm" class="form hidden" novalidate>
+        <div class="field">
+          <label for="mfaCode">Code from your authenticator app</label>
+          <input type="text" id="mfaCode" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" required>
+        </div>
+        <p class="error" id="mfaCodeError" role="alert"></p>
+        <button type="submit" id="mfaCodeBtn" class="submit-btn">
+          <span class="btn-label">Verify</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="text-btn js-cancel">Cancel</button>
+      </form>
+
+      <!-- Step 5: signed in -->
+      <div id="authedPanel" class="authed-panel hidden">
+        <p class="authed-check" aria-hidden="true">✓</p>
+        <p class="authed-text">Access granted</p>
+        <p class="authed-nickname" id="authedNickname"></p>
+        <p class="authed-email" id="authedEmail"></p>
+        <button type="button" id="logoutBtn" class="text-btn">Sign out</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Vite entry point -->
+<script type="module" src="/src/main-login.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }
+</script>
+</body>
+</html>

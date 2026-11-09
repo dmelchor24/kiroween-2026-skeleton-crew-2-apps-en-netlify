@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "SAM Validate on saving the template",
+      "trigger": "PostFileSave",
+      "description": "Runs sam validate --lint in the saved template directory. Reads filePath from the stdin JSON.",
+      "matcher": "infra/.*template\\.yaml$",
+      "action": {
+        "type": "command",
+        "command": "FILE=$(python3 -c \"import sys,json; print(json.load(sys.stdin).get('filePath',''))\" 2>/dev/null); if [ -n \"$FILE\" ]; then cd \"$(dirname \"$FILE\")\" && sam validate --lint; fi",
+        "timeout": 90
+      }
+    }
+  ]
+}
