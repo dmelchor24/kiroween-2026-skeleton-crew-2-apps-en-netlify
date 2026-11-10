@@ -2567,8 +2567,18 @@ body.dashboard-body.dashboard-ready {
     display: flex;
   }
 
-  /* Req 4.4: Topbar does not overlap the Sidebar (Topbar has z-index: 100 > Sidebar: 50) */
-  /* The hamburger toggle has z-index: 200 to sit above the Topbar */
+  /* .dashboard-layout is position:fixed, so it creates its own stacking context and
+     the toggle's z-index: 200 would only count inside it, below the Topbar (z-index: 100).
+     Raising the layout above the Topbar keeps the hamburger visible. The layout starts
+     at top: 48px, so it never covers the Topbar itself. */
+  .dashboard-layout {
+    z-index: 150;
+  }
+
+  /* Leave room for the hamburger so it does not sit on top of the brand */
+  .topbar-brand {
+    padding-left: 44px;
+  }
 }
 
 /* ---- Reduced motion ---------------------------------------- */
